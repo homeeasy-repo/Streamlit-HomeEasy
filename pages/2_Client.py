@@ -120,18 +120,59 @@ if not df.empty:
         'stage': 'Stage',
         'assigned_employee_name': 'Sale Rep'
     })
-    # Add a 'Links' column with default value 'None' for the dropdown
-    df['Links'] = df['Client ID']  # Pass Client ID to renderer
+    # Add a Links column for the dropdown renderer
+    df['Links'] = df['Client ID']
     display_cols = ['Client ID', 'Client Name', 'Stage', 'Last Activity', 'Created Date', 'Age', 'Sale Rep', 'Links']
     df = df[display_cols]
+
+# Show as a table with clickable links
+# if not df.empty:
+#     st.write("### Client List with Actions")
+#     st.write("Click an action to open the form for that client.")
+#     st.write(df.to_markdown(index=False), unsafe_allow_html=True)
 
 # 1) Define a class-based cellRenderer for the dropdown
 from st_aggrid import JsCode
 
+# dropdown_renderer = JsCode("""
+# class DropdownCellRenderer {
+#   init(params) {
+#     // 1) build the <select>
+#     this.eGui = document.createElement('select');
+#     this.eGui.style.width = '100%';
+#     this.eGui.innerHTML = `
+#       <option value="">Select…</option>
+#       <option value="requirement">Requirements</option>
+#       <option value="schedule">Schedule</option>
+#       <option value="dead">Dead</option>
+#     `;
+#     // 2) wire up the redirect
+#     this.eGui.addEventListener('change', () => {
+#       const val = this.eGui.value;
+#       if (!val) return;
+#       // 3) grab the top-level Streamlit URL
+#       const full = window.top.location.href;
+#       // 4) cut off anything from '/client' onward
+#       const base = full.split('/client')[0];
+#       // 5) build our multipage query
+#       const qp = new URLSearchParams({
+#         page:      'Client Requirement',
+#         client_id: params.value,
+#         action:    val
+#       });
+#       // 6) open in a new tab
+#       window.open(`${base}?${qp.toString()}`, '_blank');
+#       this.eGui.value = '';  // reset dropdown
+#     });
+#   }
+#   getGui() { return this.eGui; }
+# }
+# """)
+
+
 dropdown_renderer = JsCode("""
 class DropdownCellRenderer {
   init(params) {
-    // 1) build the <select>
     this.eGui = document.createElement('select');
     this.eGui.style.width = '100%';
     this.eGui.innerHTML = `
@@ -140,30 +181,29 @@ class DropdownCellRenderer {
       <option value="schedule">Schedule</option>
       <option value="dead">Dead</option>
     `;
-    // 2) wire up the redirect
     this.eGui.addEventListener('change', () => {
       const val = this.eGui.value;
       if (!val) return;
-      // 3) grab the top-level Streamlit URL
       const full = window.top.location.href;
-      // 4) cut off anything from '/client' onward
-      const base = full.split('/client')[0];
-      // 5) build our multipage query
+      let base = full;
+      if (full.toLowerCase().includes('/client')) {
+        base = full.substring(0, full.toLowerCase().indexOf('/client'));
+      }
       const qp = new URLSearchParams({
-        page:      'Client Requirement',
         client_id: params.value,
-        action:    val
+        action: val
       });
-      // 6) open in a new tab
-      window.open(`${base}?${qp.toString()}`, '_blank');
-      this.eGui.value = '';  // reset dropdown
+      window.open(`${base}/ClientRequirement?${qp.toString()}`, '_blank');
+      this.eGui.value = '';
     });
   }
   getGui() { return this.eGui; }
 }
 """)
 
+
 gb = GridOptionsBuilder.from_dataframe(df)
+# Only configure the Links column for AgGrid
 gb.configure_column(
     "Links",
     header_name="Links",
