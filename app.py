@@ -1,5 +1,5 @@
 import streamlit as st
-from pages import home
+from pages import home, client
 
 st.set_page_config(
     page_title="HomeEasy",
@@ -23,5 +23,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Only show the homepage
-home.show()
+# Sidebar navigation
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Go to", ["Home", "Client"])
+
+# Page routing
+if page == "Home":
+    home.show()
+elif page == "Client":
+    client.show()

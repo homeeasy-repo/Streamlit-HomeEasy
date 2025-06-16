@@ -131,43 +131,35 @@ from st_aggrid import JsCode
 dropdown_renderer = JsCode("""
 class DropdownCellRenderer {
   init(params) {
-    const clientId = params.value;
-    // 1) Build the <select>
+    // 1) build the <select>
     this.eGui = document.createElement('select');
     this.eGui.style.width = '100%';
-
-    // 2) Populate options
-    const opts = [
-      { val: '',             text: 'Select…' },
-      { val: 'requirement',  text: 'Requirements' },
-      { val: 'schedule',     text: 'Schedule' },
-      { val: 'dead',         text: 'Dead' }
-    ];
-    opts.forEach(o => {
-      const opt = document.createElement('option');
-      opt.value     = o.val;
-      opt.innerText = o.text;
-      this.eGui.appendChild(opt);
-    });
-
-    // 3) Wire up the redirect
+    this.eGui.innerHTML = `
+      <option value="">Select…</option>
+      <option value="requirement">Requirements</option>
+      <option value="schedule">Schedule</option>
+      <option value="dead">Dead</option>
+    `;
+    // 2) wire up the redirect
     this.eGui.addEventListener('change', () => {
-      if (!this.eGui.value) return;
-      const base = window.location.origin + window.location.pathname;
-      const qp   = new URLSearchParams({
-        page:      'Client Action',
-        client_id: clientId,
-        action:    this.eGui.value
+      const val = this.eGui.value;
+      if (!val) return;
+      // 3) grab the top-level Streamlit URL
+      const full = window.top.location.href;
+      // 4) cut off anything from '/client' onward
+      const base = full.split('/client')[0];
+      // 5) build our multipage query
+      const qp = new URLSearchParams({
+        page:      'Client Requirement',
+        client_id: params.value,
+        action:    val
       });
+      // 6) open in a new tab
       window.open(`${base}?${qp.toString()}`, '_blank');
-      this.eGui.value = '';  // reset
+      this.eGui.value = '';  // reset dropdown
     });
   }
-
-  // Ag-Grid will call this to get your element
-  getGui() {
-    return this.eGui;
-  }
+  getGui() { return this.eGui; }
 }
 """)
 
