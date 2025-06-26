@@ -1,2 +1,17 @@
 [server]
+# Enable automatic rerun when source files change
 runOnSave = true
+fileWatcherType = "auto"
+
+# Additional server settings for development
+enableCORS = false
+enableXsrfProtection = false
+maxUploadSize = 200
+
+[browser]
+# Browser settings
+gatherUsageStats = false
+
+[theme]
+# Optional: Set consistent theme
+base = "dark"

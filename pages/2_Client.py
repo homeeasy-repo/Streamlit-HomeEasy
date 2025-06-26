@@ -193,7 +193,19 @@ class DropdownCellRenderer {
         client_id: params.value,
         action: val
       });
-      window.open(`${base}/ClientRequirement?${qp.toString()}`, '_blank');
+      
+      // Route to appropriate page based on selected action
+      let targetPage = '';
+      if (val === 'requirement') {
+        targetPage = '/ClientRequirement';
+      } else if (val === 'schedule') {
+        targetPage = '/client_schedule';
+      } else if (val === 'dead') {
+        // Add dead client page route if needed
+        targetPage = '/ClientRequirement'; // fallback for now
+      }
+      
+      window.open(`${base}${targetPage}?${qp.toString()}`, '_blank');
       this.eGui.value = '';
     });
   }
